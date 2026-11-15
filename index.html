@@ -4,28 +4,49 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101725;color:#fff;font:16px system-ui;text-align:center}
 h2{font-size:20px;margin:12px}canvas{display:block;width:min(100%,920px);height:auto;margin:auto;background:linear-gradient(#36455d 75%,#45464c 75%);touch-action:manipulation}
-.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:10px}
+.pad{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;max-width:920px;margin:auto;padding:8px}.dpad,.actions{display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:7px}.pad button{min-width:62px;min-height:52px}.pad button:active,.pad button.pressed{background:#fff1b5}.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:10px}
 button{background:#f0b44b;color:#111827;border:0;border-radius:9px;padding:13px 17px;font-size:16px;font-weight:700;touch-action:manipulation}
 button:active{background:#ffe29d}#status{min-height:44px;padding:5px 15px}small{color:#b7c6d9}
 </style>
-<h2>Officer Jakester — Combat Timing Lab v3 — Sheriff Appearance Preview</h2>
+<h2>Officer Jakester — Combat Timing Lab v4 — Game-Style Controls</h2>
 <canvas id="arena" width="900" height="440" aria-label="Jakester punch timing and target range demonstration"></canvas>
-<div class="controls"><button data-move="jab">LEFT JAB</button><button data-move="cross">RIGHT CROSS</button><button data-move="heavy">HEAVY</button><button data-move="combo">LEFT–RIGHT COMBO</button><button id="reset">RESET</button></div>
+<div class="pad"><div class="dpad" aria-label="Movement controls"><button data-dir="left">◀</button><button data-dir="up">▲ JUMP</button><button data-dir="right">▶</button><button data-dir="down">▼ CROUCH</button></div><div class="actions" aria-label="Combat controls"><button data-action="punch">PUNCH</button><button data-action="kick">KICK</button><button data-action="block">BLOCK</button><button data-action="dodge">DODGE</button><button data-action="throw">THROW</button><button data-action="reverse">REVERSE</button></div></div><div class="controls"><button data-move="jab">LEFT JAB</button><button data-move="cross">RIGHT CROSS</button><button data-move="heavy">HEAVY</button><button data-move="combo">LEFT–RIGHT COMBO</button><button id="reset">RESET</button></div>
 <div id="status" role="status" aria-live="polite">Tap an attack to test strike range, impact, and recovery.</div>
-<small>Sheriff appearance preview; punches still use prototype mechanics. Not the full game. Yellow line marks the target's near edge.</small>
+<small>Mobile game-style control test: hold down + punch for crouch punch, down + kick for sweep; jump + punch/kick for air attacks. Block then reversal. This is a 2D control prototype, not final 3D combat. Yellow line marks the target's near edge.</small>
 <script>
 'use strict';
 const canvas=document.getElementById('arena'),ctx=canvas.getContext('2d'),status=document.getElementById('status');
 const moves={jab:{hand:'left',windup:100,active:105,recover:190,reach:93,damage:8},
 cross:{hand:'right',windup:140,active:125,recover:230,reach:111,damage:13},
-heavy:{hand:'right',windup:215,active:145,recover:300,reach:139,damage:21}};
-const originX=330,shoulderX=350,targetEdge=510;let queue=[],current=null,lastTime=0,hitCount=0;
+heavy:{hand:'right',windup:215,active:145,recover:300,reach:112,damage:21},kick:{hand:'right',windup:140,active:140,recover:230,reach:98,damage:14},sweep:{hand:'right',windup:170,active:150,recover:280,reach:95,damage:15},crouchPunch:{hand:'left',windup:110,active:120,recover:180,reach:72,damage:9},airPunch:{hand:'left',windup:90,active:110,recover:150,reach:85,damage:10},airKick:{hand:'right',windup:110,active:140,recover:180,reach:105,damage:16},throw:{hand:'right',windup:200,active:150,recover:300,reach:58,damage:18},reverse:{hand:'right',windup:160,active:150,recover:290,reach:105,damage:24}};
+const originX=330,shoulderX=350,targetEdge=510;let queue=[],current=null,lastTime=0,hitCount=0,held=new Set(),xOffset=0,jumpUntil=0,guardUntil=0,dodgeUntil=0,blockWindow=0;
 function enqueue(name){if(name==='combo'){queue.push('jab','cross');}else queue.push(name);if(queue.length>8)queue.splice(8);if(!current)next(performance.now());}
 function next(now){const name=queue.shift();current=name?{name,started:now,hit:false}:null;}
-function reset(){queue=[];current=null;hitCount=0;status.textContent='Reset. Tap an attack to test strike range and recovery.';}
+function reset(){queue=[];current=null;hitCount=0;held.clear();xOffset=0;jumpUntil=0;guardUntil=0;dodgeUntil=0;blockWindow=0;status.textContent='Reset. Tap an attack to test strike range and recovery.';}
 document.querySelectorAll('[data-move]').forEach(b=>b.addEventListener('click',()=>enqueue(b.dataset.move)));
 document.getElementById('reset').addEventListener('click',reset);
+const inAir=()=>performance.now()<jumpUntil;
+function act(a){
+ const now=performance.now();
+ if(a==='block'){guardUntil=now+850;blockWindow=now+1100;status.textContent='Guard raised — time a reversal after blocking';return;}
+ if(a==='dodge'){dodgeUntil=now+400;xOffset=Math.max(-145,xOffset-22);status.textContent='Backstep dodge';return;}
+ if(a==='reverse'){if(now<blockWindow){enqueue('reverse');blockWindow=0;}else status.textContent='Reversal requires a recent block';return;}
+ if(a==='punch')enqueue(inAir()?'airPunch':held.has('down')?'crouchPunch':'jab');
+ if(a==='kick')enqueue(inAir()?'airKick':held.has('down')?'sweep':'kick');
+ if(a==='throw')enqueue('throw');
+}
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>act(b.dataset.action)));
+document.querySelectorAll('[data-dir]').forEach(b=>{
+ const dir=b.dataset.dir;
+ const down=e=>{e.preventDefault();held.add(dir);b.classList.add('pressed');if(dir==='up'){jumpUntil=performance.now()+700;status.textContent='Jump — tap punch or kick for aerial attack';}};
+ const up=e=>{e.preventDefault();held.delete(dir);b.classList.remove('pressed');};
+ b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up);
+});
+document.addEventListener('keydown',e=>{if(e.repeat)return;const dirs={ArrowLeft:'left',ArrowRight:'right',ArrowDown:'down',ArrowUp:'up'};if(dirs[e.key]){held.add(dirs[e.key]);if(e.key==='ArrowUp')jumpUntil=performance.now()+700;e.preventDefault();}else if(e.key==='j')act('punch');else if(e.key==='k')act('kick');else if(e.key==='l')act('block');else if(e.key==='u')act('dodge');else if(e.key==='i')act('throw');else if(e.key==='o')act('reverse');});
+document.addEventListener('keyup',e=>{const dirs={ArrowLeft:'left',ArrowRight:'right',ArrowDown:'down',ArrowUp:'up'};if(dirs[e.key])held.delete(dirs[e.key]);});
+
 function draw(now){
+ if(held.has('left'))xOffset=Math.max(-160,xOffset-2.2);if(held.has('right'))xOffset=Math.min(115,xOffset+2.2);
  if(current){const m=moves[current.name],elapsed=now-current.started,total=m.windup+m.active+m.recover;
  if(elapsed>=total){next(now);}else{
  const impact=elapsed>=m.windup&&elapsed<m.windup+m.active;
@@ -42,7 +63,7 @@ function draw(now){
  else{const t=Math.min(1,(e-m.windup-m.active)/m.recover);extension=m.reach*(1-t)*(1-t);}
  lean=extension*0.0007;
  }
- ctx.save();ctx.translate(originX,310);ctx.rotate(lean);
+ ctx.save();const jumping=now<jumpUntil,flight=jumping?Math.sin(Math.PI*(1-(jumpUntil-now)/700))*72:0;const crouching=held.has('down')&&!jumping;ctx.translate(originX+xOffset,310-flight);if(crouching)ctx.scale(1,0.78);ctx.rotate(lean);
  // Officer Jakester: original pig sheriff concept, no cowboy hat.
  const line=(x1,y1,x2,y2,w,color)=>{ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();};
  const poly=(pts,color)=>{ctx.fillStyle=color;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fill();};
@@ -72,12 +93,12 @@ function draw(now){
  ctx.fillStyle='#9b565a';ctx.beginPath();ctx.ellipse(5,-166,5,7,0,0,Math.PI*2);ctx.ellipse(21,-166,5,7,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#1c1b1b';ctx.beginPath();ctx.arc(-14,-181,4,0,Math.PI*2);ctx.arc(19,-181,4,0,Math.PI*2);ctx.fill();
  // Arms: articulated-looking sleeves, gloves and punches
- const extLeft=hand==='left'?extension:0,extRight=hand==='right'?extension:0;
+ const kicking=current&&['kick','sweep','airKick','reverse'].includes(current.name);if(kicking){line(25,0,36+extension*0.85,0+(current.name==='sweep'?22:-35),27,'#414a45');ctx.fillStyle='#1d2225';ctx.fillRect(31+extension*0.85,current.name==='sweep'?12:-45,30,17);}if(now<guardUntil){ctx.fillStyle='#f5d565';ctx.font='bold 14px system-ui';ctx.fillText('BLOCK',-25,-236);}const extLeft=!kicking&&hand==='left'?extension:0,extRight=!kicking&&hand==='right'?extension:0;
  line(-39,-116,-56,-84,29,'#793e36');line(40,-116,55,-84,29,'#793e36');
  line(-56,-84,8+extLeft,-91,21,'#d79a8b');line(55,-84,15+extRight,-73,21,'#d79a8b');
  ctx.fillStyle='#222a2b';ctx.beginPath();ctx.ellipse(15+extLeft,-91,14,12,0,0,Math.PI*2);ctx.ellipse(22+extRight,-73,14,12,0,0,Math.PI*2);ctx.fill();
  ctx.restore();
- ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('LEFT / RIGHT • WIND-UP → IMPACT → RECOVERY',18,32);
+ ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('MOVE • JUMP • CROUCH • PUNCH • KICK • BLOCK • DODGE • THROW • REVERSAL',18,32);
  requestAnimationFrame(draw);
 }
 requestAnimationFrame(draw);
