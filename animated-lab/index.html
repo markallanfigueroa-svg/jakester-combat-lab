@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop</h2><small>EARLY ARTICULATED 3D BLOCKOUT • NOT FINAL CHARACTER ART</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This is a 3D movement prototype with articulated body parts, not yet a skinned production model or an exact match to the reference illustrations. Throw and reversal use placeholder choreography.</p><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v2</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v2</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v2 appearance pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(0,2.3,8.7);camera.lookAt(0,1.5,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
 scene.add(new T.HemisphereLight(0xffffff,0x4b5266,2));const lamp=new T.DirectionalLight(0xffe6b8,3);lamp.position.set(-3,8,5);scene.add(lamp);
@@ -15,6 +15,31 @@ for(const x of [-.17,.17])ball(head,.045,glove,x,.37,.44);
 const arms={};for(const side of ['L','R']){const sign=side==='L'?-1:1;const shoulder=new T.Group();shoulder.position.set(sign*.62,2.59,0);body.add(shoulder);ball(shoulder,.24,shirt,0,0,0);box(shoulder,.32,.55,.34,shirt,0,-.31,0);const elbow=new T.Group();elbow.position.set(0,-.55,0);shoulder.add(elbow);box(elbow,.26,.54,.26,skin,0,-.26,0);ball(elbow,.18,glove,0,-.58,.03);arms[side]={shoulder,elbow};}
 const legs={};for(const side of ['L','R']){const sign=side==='L'?-1:1;const hip=new T.Group();hip.position.set(sign*.27,1.64,0);body.add(hip);box(hip,.37,.66,.4,pants,0,-.33,0);const knee=new T.Group();knee.position.y=-.67;hip.add(knee);box(knee,.37,.67,.4,pants,0,-.32,0);box(knee,.43,.25,.45,vest,0,-.08,.24);box(knee,.48,.2,.7,boot,0,-.71,.12);legs[side]={hip,knee};}
 const enemy=new T.Group();enemy.position.x=2.45;scene.add(enemy);box(enemy,.62,1.4,.38,mat('#737d8c'),0,1.6,0);ball(enemy,.3,mat('#9da6b4'),0,2.5,0);
+
+// Character appearance pass: procedural 3D details follow the articulated groups.
+// Still a stylized blockout, not the final sculpt or reference-perfect mesh.
+const beard=mat('#211916'),plaidDark=mat('#302c32'),plaidGold=mat('#d38c43'),metal=mat('#a49b8e'),redSkin=mat('#ba6759');
+const torso=body;
+for(let i=0;i<6;i++){const x=-.44+i*.17;box(torso,.026,1.02,.035,i%2?plaidGold:plaidDark,x,2.18,.29);}
+for(let i=0;i<5;i++){const y=1.74+i*.20;box(torso,.97,.026,.04,i%2?plaidGold:plaidDark,0,y,.31);}
+for(let i=0;i<3;i++){box(torso,.19,.21,.12,vest,-.26+i*.26,1.98,.46);box(torso,.16,.025,.14,metal,-.26+i*.26,2.03,.53);}
+box(torso,.14,.19,.11,glove,-.31,2.57,.47);box(torso,.07,.07,.12,metal,-.31,2.66,.54);
+const star=new T.Mesh(new T.CylinderGeometry(.15,.15,.025,5),gold);star.rotation.x=Math.PI/2;star.rotation.z=.33;star.position.set(.26,2.45,.49);torso.add(star);
+box(torso,.89,.12,.58,glove,0,1.66,.02);const buckle=box(torso,.19,.16,.09,gold,0,1.65,.36);
+const muzzle=ball(head,.27,redSkin,.15,.2,.43);muzzle.scale.set(1.35,.74,.8);
+ball(head,.065,beard,.035,.23,.68);ball(head,.065,beard,.27,.23,.68);
+const jaw=ball(head,.29,beard,0,-.025,.23);jaw.scale.set(1.2,.56,.78);
+for(let i=0;i<5;i++){const spike=part(head,new T.ConeGeometry(.085,.22,7),hair,-.28+i*.14,.72+(i%2)*.045,.0);spike.rotation.z=-.25;}
+for(const x of [-.16,.16]){box(head,.17,.045,.045,beard,x,.44,.44);}
+for(const side of ['L','R']){const a=arms[side],l=legs[side];
+ box(a.shoulder,.36,.18,.39,plaidDark,0,-.25,.01);
+ for(let i=0;i<3;i++){box(a.shoulder,.36,.028,.40,plaidGold,0,-.21-i*.11,.02);}
+ box(a.elbow,.29,.19,.29,glove,0,-.46,0);
+ box(l.knee,.42,.29,.48,vest,0,-.10,.25);
+ box(l.knee,.33,.12,.54,metal,0,-.10,.51);
+ box(l.knee,.47,.14,.71,glove,0,-.70,.17);
+}
+const holster=box(body,.22,.45,.25,glove,-.47,1.34,.15);holster.rotation.z=-.13;
 const moves=['Idle','Walk','Jab','Cross','Heavy','Combo','Front Kick','Roundhouse','Sweep','Crouch Punch','Jump','Air Punch','Air Kick','Block','Dodge','Throw','Reversal'];const buttons=document.querySelector('#buttons');let active='Idle',start=performance.now(),duration=1.2;const times={'Idle':1,'Walk':1.3,'Jab':.65,'Cross':.8,'Heavy':1.05,'Combo':1.3,'Front Kick':.9,'Roundhouse':1.15,'Sweep':1.2,'Crouch Punch':.85,'Jump':1,'Air Punch':1,'Air Kick':1,'Block':1.2,'Dodge':.8,'Throw':1.3,'Reversal':1.4};moves.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{active=n;start=performance.now();duration=times[n];document.querySelector('#status').textContent=n+' • animated 3D test';};buttons.appendChild(b)});
 function reset(){body.position.set(0,0,0);body.rotation.set(0,0,0);head.rotation.set(0,0,0);enemy.rotation.z=0;for(const side of ['L','R']){const a=arms[side],l=legs[side],sgn=side==='L'?-1:1;a.shoulder.rotation.set(-.58,0,sgn*.34);a.elbow.rotation.set(-1.35,0,0);l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0)}}
 function pulse(t,a=.5,b=.8){return Math.max(0,Math.min(1,(t-a)/.15,(b-t)/.15))}
