@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v3</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v3</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v3 motion pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v4</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v4</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v4 heavy-strike pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(0,2.6,10.2);camera.lookAt(0,1.85,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
 scene.add(new T.HemisphereLight(0xffffff,0x4b5266,2));const lamp=new T.DirectionalLight(0xffe6b8,3);lamp.position.set(-3,8,5);scene.add(lamp);
@@ -40,7 +40,7 @@ for(const side of ['L','R']){const a=arms[side],l=legs[side];
  box(l.knee,.47,.14,.71,glove,0,-.70,.17);
 }
 const holster=box(body,.22,.45,.25,glove,-.47,1.34,.15);holster.rotation.z=-.13;
-const moves=['Idle','Walk','Jab','Cross','Heavy','Combo','Front Kick','Roundhouse','Sweep','Crouch Punch','Jump','Air Punch','Air Kick','Block','Dodge','Throw','Reversal'];const buttons=document.querySelector('#buttons');let active='Idle',start=performance.now(),duration=1.2;const times={'Idle':1,'Walk':1.3,'Jab':.65,'Cross':.8,'Heavy':1.05,'Combo':1.3,'Front Kick':.9,'Roundhouse':1.15,'Sweep':1.2,'Crouch Punch':.85,'Jump':1,'Air Punch':1,'Air Kick':1,'Block':1.2,'Dodge':.8,'Throw':1.3,'Reversal':1.4};moves.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{active=n;start=performance.now();duration=times[n];document.querySelector('#status').textContent=n+' • animated 3D test';};buttons.appendChild(b)});
+const moves=['Idle','Walk','Jab','Cross','Heavy','Combo','Front Kick','Roundhouse','Sweep','Crouch Punch','Jump','Air Punch','Air Kick','Block','Dodge','Throw','Reversal'];const buttons=document.querySelector('#buttons');let active='Idle',start=performance.now(),duration=1.2;const times={'Idle':1,'Walk':1.3,'Jab':.65,'Cross':.8,'Heavy':1.55,'Combo':1.3,'Front Kick':.9,'Roundhouse':1.15,'Sweep':1.2,'Crouch Punch':.85,'Jump':1,'Air Punch':1,'Air Kick':1,'Block':1.2,'Dodge':.8,'Throw':1.3,'Reversal':1.4};moves.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{active=n;start=performance.now();duration=times[n];document.querySelector('#status').textContent=n+' • animated 3D test';};buttons.appendChild(b)});
 // Smooth attack envelope with anticipation, full extension, hold and recovery.
 const clamp=x=>Math.max(0,Math.min(1,x)),ease=x=>{x=clamp(x);return x*x*(3-2*x)};
 function envelope(t,wind=.16,peak=.43,hold=.59,end=.91){
@@ -53,6 +53,20 @@ function reset(){body.position.set(0,0,0);body.rotation.set(0,0,0);head.rotation
  l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0);}
 }
 function strike(side,power,twist){const a=arms[side];a.shoulder.rotation.x=-.65-1.08*power;a.elbow.rotation.x=-1.55+1.42*power;a.shoulder.rotation.y=(side==='L'?.3:-.3)*power;body.rotation.y=twist*power;head.rotation.y=-body.rotation.y*.48;body.position.x=.10*power;}
+function heavyStrike(t){
+ const wind=envelope(t,.04,.19,.27,.36),drive=envelope(t,.28,.47,.57,.86),follow=envelope(t,.46,.61,.68,.94);
+ const arm=arms.L; // anatomical right arm appears viewer-left
+ arm.shoulder.rotation.x=-.65+.30*wind-1.48*drive;
+ arm.elbow.rotation.x=-1.55-.12*wind+1.50*drive;
+ arm.shoulder.rotation.y=.22*wind+.43*drive;
+ body.rotation.y=.27*wind-.68*drive-.18*follow;
+ body.rotation.z=-.12*drive;head.rotation.y=-body.rotation.y*.48;
+ body.position.x=-.12*wind+.27*drive;body.position.y=-.07*drive;
+ legs.L.hip.rotation.y=-.30*drive;legs.R.hip.rotation.y=.20*drive;
+ legs.L.hip.rotation.x=.14*drive;legs.R.hip.rotation.x=-.19*drive;
+ // Non-punching glove stays up near the face, even through follow-through.
+ arms.R.shoulder.rotation.x=-1.04;arms.R.elbow.rotation.x=-1.88;
+}
 function kick(side,power,kind){const l=legs[side];l.hip.rotation.x=-1.48*power;l.knee.rotation.x=.30*power;body.rotation.x=.11*power;
  if(kind==='Roundhouse'||kind==='Reversal'){l.hip.rotation.y=-.65*power;body.rotation.y=.75*power;}
  if(kind==='Sweep'){body.position.y=-.52*power;l.hip.rotation.z=-1.18*power;l.hip.rotation.x=-.42*power;}
@@ -61,7 +75,8 @@ function animate(now){requestAnimationFrame(animate);let t=clamp((now-start)/(du
 reset();
 if(active==='Walk'){const phase=t*12;root.position.x=.55*t;legs.L.hip.rotation.x=Math.sin(phase)*.55;legs.R.hip.rotation.x=-Math.sin(phase)*.55;legs.L.knee.rotation.x=Math.max(0,Math.sin(phase))*.35;legs.R.knee.rotation.x=Math.max(0,-Math.sin(phase))*.35;body.rotation.y=Math.sin(phase)*.065;body.position.y=.045*Math.abs(Math.sin(phase));}
 if(active==='Jab')strike('R',power,.16);
-if(active==='Cross'||active==='Heavy')strike('L',power,active==='Heavy'?- .48:-.32);
+if(active==='Cross')strike('L',power,-.32);
+if(active==='Heavy')heavyStrike(t);
 if(active==='Combo'){const p1=envelope(t*2,.12,.35,.49,.85),p2=envelope((t-.47)*2,.12,.35,.49,.85);strike('R',p1,.12);if(p2>0)strike('L',p2,-.32);}
 if(active==='Crouch Punch'){body.position.y=-.42*envelope(t,.05,.2,.68,.93);strike('R',power,.12);}
 if(active==='Front Kick'||active==='Roundhouse'||active==='Sweep'||active==='Reversal')kick('R',power,active);
