@@ -8,11 +8,11 @@ h2{font-size:20px;margin:12px}canvas{display:block;width:min(100%,920px);height:
 button{background:#f0b44b;color:#111827;border:0;border-radius:9px;padding:13px 17px;font-size:16px;font-weight:700;touch-action:manipulation}
 button:active{background:#ffe29d}#status{min-height:44px;padding:5px 15px}small{color:#b7c6d9}
 </style>
-<h2>Officer Jakester — Combat Timing Lab v2</h2>
+<h2>Officer Jakester — Combat Timing Lab v3 — Sheriff Appearance Preview</h2>
 <canvas id="arena" width="900" height="440" aria-label="Jakester punch timing and target range demonstration"></canvas>
 <div class="controls"><button data-move="jab">LEFT JAB</button><button data-move="cross">RIGHT CROSS</button><button data-move="heavy">HEAVY</button><button data-move="combo">LEFT–RIGHT COMBO</button><button id="reset">RESET</button></div>
 <div id="status" role="status" aria-live="polite">Tap an attack to test strike range, impact, and recovery.</div>
-<small>Standalone mechanics prototype; not the full game. Yellow line marks the target's near edge.</small>
+<small>Sheriff appearance preview; punches still use prototype mechanics. Not the full game. Yellow line marks the target's near edge.</small>
 <script>
 'use strict';
 const canvas=document.getElementById('arena'),ctx=canvas.getContext('2d'),status=document.getElementById('status');
@@ -43,13 +43,40 @@ function draw(now){
  lean=extension*0.0007;
  }
  ctx.save();ctx.translate(originX,310);ctx.rotate(lean);
- ctx.fillStyle='#273b35';ctx.fillRect(-37,-121,75,123);
- ctx.fillStyle='#d6a08c';ctx.beginPath();ctx.arc(0,-165,43,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#302522';ctx.fillRect(-40,-199,80,14);ctx.fillRect(-36,-150,72,13);
- ctx.strokeStyle='#d6a08c';ctx.lineWidth=23;ctx.lineCap='round';
- ctx.beginPath();ctx.moveTo(-28,-112);ctx.lineTo(hand==='left'?42+extension:5,-94);ctx.stroke();
- ctx.beginPath();ctx.moveTo(29,-112);ctx.lineTo(hand==='right'?42+extension:5,-94);ctx.stroke();
- ctx.fillStyle='#22252d';ctx.fillRect(-31,0,25,45);ctx.fillRect(10,0,25,45);ctx.restore();
+ // Officer Jakester: original pig sheriff concept, no cowboy hat.
+ const line=(x1,y1,x2,y2,w,color)=>{ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();};
+ const poly=(pts,color)=>{ctx.fillStyle=color;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fill();};
+ // Cargo trousers, belt, knee pads and boots
+ poly([[-34,-19],[1,-19],[-2,39],[-33,39]],'#414a45');poly([[4,-19],[37,-19],[39,39],[6,39]],'#414a45');
+ ctx.fillStyle='#23282b';ctx.fillRect(-39,32,40,14);ctx.fillRect(5,32,41,14);
+ ctx.fillStyle='#657064';ctx.fillRect(-31,11,25,15);ctx.fillRect(9,11,26,15);
+ ctx.fillStyle='#23282b';ctx.fillRect(-38,-25,78,13);ctx.fillStyle='#d6a23b';ctx.fillRect(-3,-24,13,10);
+ // Plaid shirt and broad tactical vest
+ poly([[-48,-132],[42,-132],[49,-29],[-48,-29]],'#793e36');
+ ctx.strokeStyle='#a86958';ctx.lineWidth=3;
+ for(let x=-37;x<43;x+=18){ctx.beginPath();ctx.moveTo(x,-127);ctx.lineTo(x,-32);ctx.stroke();}
+ for(let y=-117;y<-30;y+=19){ctx.beginPath();ctx.moveTo(-45,y);ctx.lineTo(44,y);ctx.stroke();}
+ poly([[-32,-126],[31,-126],[39,-43],[-35,-43]],'#293b34');
+ ctx.fillStyle='#3c5145';ctx.fillRect(-28,-109,22,27);ctx.fillRect(9,-109,22,27);
+ ctx.fillStyle='#1a2623';ctx.fillRect(-29,-70,60,17);
+ ctx.fillStyle='#f1c453';ctx.beginPath();ctx.moveTo(22,-91);ctx.lineTo(28,-84);ctx.lineTo(22,-76);ctx.lineTo(16,-84);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#f7e4b3';ctx.font='bold 8px system-ui';ctx.fillText('SHERIFF',-24,-116);
+ // Neck, pink pig head, snout and ears
+ ctx.fillStyle='#b87a70';ctx.fillRect(-14,-145,28,22);
+ ctx.fillStyle='#d79a8b';ctx.beginPath();ctx.ellipse(0,-173,40,41,0,0,Math.PI*2);ctx.fill();
+ poly([[-33,-194],[-43,-223],[-14,-207]],'#d79a8b');poly([[18,-208],[41,-225],[35,-193]],'#d79a8b');
+ ctx.fillStyle='#a95f66';ctx.beginPath();ctx.ellipse(-31,-208,6,10,-.4,0,Math.PI*2);ctx.ellipse(30,-209,6,10,.4,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#352925';ctx.beginPath();ctx.ellipse(0,-202,34,15,0,Math.PI,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#342724';ctx.beginPath();ctx.ellipse(0,-148,23,12,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e8aa9c';ctx.beginPath();ctx.ellipse(12,-166,27,17,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#9b565a';ctx.beginPath();ctx.ellipse(5,-166,5,7,0,0,Math.PI*2);ctx.ellipse(21,-166,5,7,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#1c1b1b';ctx.beginPath();ctx.arc(-14,-181,4,0,Math.PI*2);ctx.arc(19,-181,4,0,Math.PI*2);ctx.fill();
+ // Arms: articulated-looking sleeves, gloves and punches
+ const extLeft=hand==='left'?extension:0,extRight=hand==='right'?extension:0;
+ line(-39,-116,-56,-84,29,'#793e36');line(40,-116,55,-84,29,'#793e36');
+ line(-56,-84,8+extLeft,-91,21,'#d79a8b');line(55,-84,15+extRight,-73,21,'#d79a8b');
+ ctx.fillStyle='#222a2b';ctx.beginPath();ctx.ellipse(15+extLeft,-91,14,12,0,0,Math.PI*2);ctx.ellipse(22+extRight,-73,14,12,0,0,Math.PI*2);ctx.fill();
+ ctx.restore();
  ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('LEFT / RIGHT • WIND-UP → IMPACT → RECOVERY',18,32);
  requestAnimationFrame(draw);
 }
