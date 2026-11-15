@@ -8,7 +8,7 @@ h2{font-size:20px;margin:12px}canvas{display:block;width:min(100%,920px);height:
 button{background:#f0b44b;color:#111827;border:0;border-radius:9px;padding:13px 17px;font-size:16px;font-weight:700;touch-action:manipulation}
 #arena{touch-action:none}.pad{touch-action:none}.pad button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}button:active{background:#ffe29d}#status{min-height:44px;padding:5px 15px}small{color:#b7c6d9}
 </style>
-<h2>Officer Jakester — Combat Timing Lab v9 — Always Guard</h2>
+<h2>Officer Jakester — Combat Timing Lab v10 — Face Guard</h2>
 <canvas id="arena" width="900" height="440" aria-label="Jakester punch timing and target range demonstration"></canvas>
 <div class="pad"><div class="dpad" aria-label="Movement controls"><button data-dir="left">◀</button><button data-dir="up">▲ JUMP</button><button data-dir="right">▶</button><button data-dir="down">▼ CROUCH (TOGGLE)</button></div><div class="actions" aria-label="Combat controls"><button data-action="punch">PUNCH</button><button data-action="kick">KICK</button><button data-action="block">BLOCK</button><button data-action="dodge">DODGE</button><button data-action="throw">THROW</button><button data-action="reverse">REVERSE</button></div></div><div class="controls"><button data-move="jab">LEFT JAB</button><button data-move="cross">RIGHT CROSS</button><button data-move="heavy">HEAVY</button><button data-move="combo">LEFT–RIGHT COMBO</button><button id="reset">RESET</button></div>
 <div id="status" role="status" aria-live="polite">Tap an attack to test strike range, impact, and recovery.</div>
@@ -102,13 +102,15 @@ const rightWind=heavyRight?Math.min(1,extension/112):0;
 line(-39,-116,-56,-84,29,'#793e36');
 line(40,-116,55,-84,29,'#793e36');
 line(-56,-84,heavyRight?(-18+rightWind*162):8+extLeft,heavyRight?(-108-rightWind*4):-91,23,'#d79a8b');
-line(55,-84,heavyRight?17:15+extRight,heavyRight?-132:-73,21,'#d79a8b');
+line(55,-84,62,-112,22,'#d79a8b');
+// Bend Jakester's left elbow and keep his glove at cheek/temple height.
+line(62,-112,heavyRight?27:27+extRight,heavyRight?-173:-159,20,'#d79a8b');
 ctx.fillStyle='#222a2b';ctx.beginPath();
 ctx.ellipse(heavyRight?(-11+rightWind*162):15+extLeft,heavyRight?(-108-rightWind*4):-91,15,13,0,0,Math.PI*2);
-ctx.ellipse(heavyRight?24:22+extRight,heavyRight?-132:-73,14,12,0,0,Math.PI*2);ctx.fill();
+ctx.ellipse(heavyRight?27:27+extRight,heavyRight?-173:-159,17,17,0,0,Math.PI*2);ctx.fill();
 if(heavyRight){ctx.fillStyle='#ffe08a';ctx.font='bold 18px system-ui';ctx.fillText('JAKESTER RIGHT HAND →',-85,-248);}
 ctx.restore();
- ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('v9 • RIGHT-HAND HEAVY • OPPOSITE HAND GUARDS',18,32);
+ ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('v10 • RIGHT HEAVY • LEFT GLOVE GUARDS FACE',18,32);
  requestAnimationFrame(draw);
 }
 requestAnimationFrame(draw);
