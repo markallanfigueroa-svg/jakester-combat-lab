@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v5</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v5</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v5 heavy-strike visibility pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v6</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v6</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v6 roundhouse motion pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(2.3,2.7,9.8);camera.lookAt(0,1.85,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
 scene.add(new T.HemisphereLight(0xffffff,0x4b5266,2));const lamp=new T.DirectionalLight(0xffe6b8,3);lamp.position.set(-3,8,5);scene.add(lamp);
@@ -76,6 +76,29 @@ function kick(side,power,kind){const l=legs[side];l.hip.rotation.x=-1.48*power;l
  if(kind==='Roundhouse'||kind==='Reversal'){l.hip.rotation.y=-.65*power;body.rotation.y=.75*power;}
  if(kind==='Sweep'){body.position.y=-.52*power;l.hip.rotation.z=-1.18*power;l.hip.rotation.x=-.42*power;}
 }
+// Roundhouse: plant support foot, chamber knee, turn hips toward enemy at screen-right,
+// extend shin into contact, and recoil into the guarded stance.
+function roundhouse(t){
+ const chamber=envelope(t,.06,.19,.35,.50);
+ const turn=envelope(t,.19,.36,.65,.90);
+ const extend=envelope(t,.32,.49,.61,.83);
+ const l=legs.R,plant=legs.L;
+ body.rotation.y=-.18*chamber-1.0*turn;
+ body.rotation.z=-.09*turn;
+ body.position.x=.20*turn;
+ body.position.y=.06*chamber;
+ plant.hip.rotation.y=.33*turn;plant.knee.rotation.x=.14*turn;
+ l.hip.rotation.x=-.68*chamber-.32*extend;
+ l.hip.rotation.y=-.65*turn;
+ l.hip.rotation.z=-.26*chamber-1.48*extend;
+ l.knee.rotation.x=.90*chamber-.82*extend;
+ arms.L.shoulder.rotation.x=-1.08;arms.L.elbow.rotation.x=-1.75;
+ arms.R.shoulder.rotation.x=-1.02;arms.R.elbow.rotation.x=-1.68;
+ head.rotation.y=-body.rotation.y*.35;
+ impact.position.set(1.25,1.7,.65);
+ impact.material.opacity=.85*envelope(t,.46,.52,.59,.69);
+ impact.scale.setScalar(1+.6*extend);
+}
 function animate(now){requestAnimationFrame(animate);let t=clamp((now-start)/(duration*1000));const w=Math.sin(Math.PI*t),power=envelope(t);
 reset();
 if(active==='Walk'){const phase=t*12;root.position.x=.55*t;legs.L.hip.rotation.x=Math.sin(phase)*.55;legs.R.hip.rotation.x=-Math.sin(phase)*.55;legs.L.knee.rotation.x=Math.max(0,Math.sin(phase))*.35;legs.R.knee.rotation.x=Math.max(0,-Math.sin(phase))*.35;body.rotation.y=Math.sin(phase)*.065;body.position.y=.045*Math.abs(Math.sin(phase));}
@@ -84,7 +107,8 @@ if(active==='Cross')strike('L',power,-.32);
 if(active==='Heavy')heavyStrike(t);
 if(active==='Combo'){const p1=envelope(t*2,.12,.35,.49,.85),p2=envelope((t-.47)*2,.12,.35,.49,.85);strike('R',p1,.12);if(p2>0)strike('L',p2,-.32);}
 if(active==='Crouch Punch'){body.position.y=-.42*envelope(t,.05,.2,.68,.93);strike('R',power,.12);}
-if(active==='Front Kick'||active==='Roundhouse'||active==='Sweep'||active==='Reversal')kick('R',power,active);
+if(active==='Front Kick'||active==='Sweep'||active==='Reversal')kick('R',power,active);
+if(active==='Roundhouse')roundhouse(t);
 if(active==='Sweep')body.position.y=-.53*envelope(t,.08,.25,.72,.95);
 if(active==='Jump'||active==='Air Punch'||active==='Air Kick'){
  const height=.92*Math.sin(Math.PI*t);root.position.y=height;
