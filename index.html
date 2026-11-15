@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jakester Combat Lab v2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101725;color:#fff;font:16px system-ui;text-align:center}
+h2{font-size:20px;margin:12px}canvas{display:block;width:min(100%,920px);height:auto;margin:auto;background:linear-gradient(#36455d 75%,#45464c 75%);touch-action:manipulation}
+.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:10px}
+button{background:#f0b44b;color:#111827;border:0;border-radius:9px;padding:13px 17px;font-size:16px;font-weight:700;touch-action:manipulation}
+button:active{background:#ffe29d}#status{min-height:44px;padding:5px 15px}small{color:#b7c6d9}
+</style>
+<h2>Officer Jakester — Combat Timing Lab v2</h2>
+<canvas id="arena" width="900" height="440" aria-label="Jakester punch timing and target range demonstration"></canvas>
+<div class="controls"><button data-move="jab">LEFT JAB</button><button data-move="cross">RIGHT CROSS</button><button data-move="heavy">HEAVY</button><button data-move="combo">LEFT–RIGHT COMBO</button><button id="reset">RESET</button></div>
+<div id="status" role="status" aria-live="polite">Tap an attack to test strike range, impact, and recovery.</div>
+<small>Standalone mechanics prototype; not the full game. Yellow line marks the target's near edge.</small>
+<script>
+'use strict';
+const canvas=document.getElementById('arena'),ctx=canvas.getContext('2d'),status=document.getElementById('status');
+const moves={jab:{hand:'left',windup:100,active:105,recover:190,reach:93,damage:8},
+cross:{hand:'right',windup:140,active:125,recover:230,reach:111,damage:13},
+heavy:{hand:'right',windup:215,active:145,recover:300,reach:139,damage:21}};
+const originX=330,shoulderX=350,targetEdge=510;let queue=[],current=null,lastTime=0,hitCount=0;
+function enqueue(name){if(name==='combo'){queue.push('jab','cross');}else queue.push(name);if(queue.length>8)queue.splice(8);if(!current)next(performance.now());}
+function next(now){const name=queue.shift();current=name?{name,started:now,hit:false}:null;}
+function reset(){queue=[];current=null;hitCount=0;status.textContent='Reset. Tap an attack to test strike range and recovery.';}
+document.querySelectorAll('[data-move]').forEach(b=>b.addEventListener('click',()=>enqueue(b.dataset.move)));
+document.getElementById('reset').addEventListener('click',reset);
+function draw(now){
+ if(current){const m=moves[current.name],elapsed=now-current.started,total=m.windup+m.active+m.recover;
+ if(elapsed>=total){next(now);}else{
+ const impact=elapsed>=m.windup&&elapsed<m.windup+m.active;
+ if(impact&&!current.hit){current.hit=true;hitCount++;status.textContent=m.hand.toUpperCase()+' '+current.name.toUpperCase()+' — active strike, '+m.reach+' px visual reach; impact #'+hitCount;}
+ if(!impact)status.textContent=m.hand.toUpperCase()+' '+current.name.toUpperCase()+' — '+(elapsed<m.windup?'wind-up':'recovery')+' | queued '+queue.length;
+ }}
+ ctx.clearRect(0,0,900,440);ctx.fillStyle='#4b4c52';ctx.fillRect(0,330,900,110);
+ ctx.strokeStyle='#facc15';ctx.lineWidth=3;ctx.setLineDash([7,7]);ctx.beginPath();ctx.moveTo(targetEdge,65);ctx.lineTo(targetEdge,330);ctx.stroke();ctx.setLineDash([]);
+ ctx.fillStyle='#6b7280';ctx.fillRect(550,135,65,190);ctx.fillStyle='#e5e7eb';ctx.font='18px system-ui';ctx.fillText('TARGET',548,125);
+ let extension=0,lean=0,hand='left';
+ if(current){const m=moves[current.name],e=now-current.started;hand=m.hand;
+ if(e<m.windup){extension=-10*Math.sin(Math.PI*e/m.windup);}
+ else if(e<m.windup+m.active){const t=(e-m.windup)/m.active;extension=m.reach*(0.85+0.15*Math.sin(Math.PI*t));}
+ else{const t=Math.min(1,(e-m.windup-m.active)/m.recover);extension=m.reach*(1-t)*(1-t);}
+ lean=extension*0.0007;
+ }
+ ctx.save();ctx.translate(originX,310);ctx.rotate(lean);
+ ctx.fillStyle='#273b35';ctx.fillRect(-37,-121,75,123);
+ ctx.fillStyle='#d6a08c';ctx.beginPath();ctx.arc(0,-165,43,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#302522';ctx.fillRect(-40,-199,80,14);ctx.fillRect(-36,-150,72,13);
+ ctx.strokeStyle='#d6a08c';ctx.lineWidth=23;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(-28,-112);ctx.lineTo(hand==='left'?42+extension:5,-94);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(29,-112);ctx.lineTo(hand==='right'?42+extension:5,-94);ctx.stroke();
+ ctx.fillStyle='#22252d';ctx.fillRect(-31,0,25,45);ctx.fillRect(10,0,25,45);ctx.restore();
+ ctx.fillStyle='#fff';ctx.font='16px system-ui';ctx.fillText('LEFT / RIGHT • WIND-UP → IMPACT → RECOVERY',18,32);
+ requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script></html>
