@@ -1,6 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v4</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v4</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v4 heavy-strike pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v5</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v5</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v5 heavy-strike visibility pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
-const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(0,2.6,10.2);camera.lookAt(0,1.85,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
+const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(2.3,2.7,9.8);camera.lookAt(0,1.85,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
 scene.add(new T.HemisphereLight(0xffffff,0x4b5266,2));const lamp=new T.DirectionalLight(0xffe6b8,3);lamp.position.set(-3,8,5);scene.add(lamp);
 const ground=new T.Mesh(new T.PlaneGeometry(30,30),new T.MeshStandardMaterial({color:0x3e454a}));ground.rotation.x=-Math.PI/2;scene.add(ground);
 const mat=(c)=>new T.MeshStandardMaterial({color:c,roughness:.83});const skin=mat('#d68c77'),nose=mat('#a95e61'),hair=mat('#29221e'),shirt=mat('#a75a35'),vest=mat('#3b342c'),pants=mat('#30343c'),glove=mat('#171b22'),gold=mat('#e9b948'),boot=mat('#171719');
@@ -14,6 +14,7 @@ ball(head,.18,skin,-.43,.42,.05);ball(head,.18,skin,.43,.42,.05);box(head,.62,.1
 for(const x of [-.17,.17])ball(head,.045,glove,x,.37,.44);
 const arms={};for(const side of ['L','R']){const sign=side==='L'?-1:1;const shoulder=new T.Group();shoulder.position.set(sign*.62,2.59,0);body.add(shoulder);ball(shoulder,.24,shirt,0,0,0);box(shoulder,.32,.55,.34,shirt,0,-.31,0);const elbow=new T.Group();elbow.position.set(0,-.55,0);shoulder.add(elbow);box(elbow,.26,.54,.26,skin,0,-.26,0);ball(elbow,.18,glove,0,-.58,.03);arms[side]={shoulder,elbow};}
 const legs={};for(const side of ['L','R']){const sign=side==='L'?-1:1;const hip=new T.Group();hip.position.set(sign*.27,1.64,0);body.add(hip);box(hip,.37,.66,.4,pants,0,-.33,0);const knee=new T.Group();knee.position.y=-.67;hip.add(knee);box(knee,.37,.67,.4,pants,0,-.32,0);box(knee,.43,.25,.45,vest,0,-.08,.24);box(knee,.48,.2,.7,boot,0,-.71,.12);legs[side]={hip,knee};}
+const impact=new T.Mesh(new T.RingGeometry(.22,.42,24),new T.MeshBasicMaterial({color:0xffd36b,transparent:true,opacity:0,side:T.DoubleSide}));impact.position.set(-1.25,2.15,.55);scene.add(impact);
 const enemy=new T.Group();enemy.position.x=2.45;scene.add(enemy);box(enemy,.62,1.4,.38,mat('#737d8c'),0,1.6,0);ball(enemy,.3,mat('#9da6b4'),0,2.5,0);
 
 // Character appearance pass: procedural 3D details follow the articulated groups.
@@ -47,7 +48,7 @@ function envelope(t,wind=.16,peak=.43,hold=.59,end=.91){
  if(t<wind)return 0;if(t<peak)return ease((t-wind)/(peak-wind));
  if(t<hold)return 1;if(t<end)return 1-ease((t-hold)/(end-hold));return 0;
 }
-function reset(){body.position.set(0,0,0);body.rotation.set(0,0,0);head.rotation.set(0,0,0);enemy.rotation.z=0;root.position.set(0,0,0);
+function reset(){impact.material.opacity=0;body.position.set(0,0,0);body.rotation.set(0,0,0);head.rotation.set(0,0,0);enemy.rotation.z=0;root.position.set(0,0,0);
  for(const side of ['L','R']){const a=arms[side],l=legs[side],sgn=side==='L'?-1:1;
  a.shoulder.rotation.set(-.65,0,sgn*.22);a.elbow.rotation.set(-1.55,0,0);
  l.hip.rotation.set(0,0,0);l.knee.rotation.set(0,0,0);}
@@ -59,9 +60,13 @@ function heavyStrike(t){
  arm.shoulder.rotation.x=-.65+.30*wind-1.48*drive;
  arm.elbow.rotation.x=-1.55-.12*wind+1.50*drive;
  arm.shoulder.rotation.y=.22*wind+.43*drive;
+ // Shoulder Z brings the glove across the visible screen plane; X alone looked unchanged.
+ arm.shoulder.rotation.z=-.22*wind+1.35*drive;
+ arm.elbow.rotation.z=-.12*wind+.40*drive;
  body.rotation.y=.27*wind-.68*drive-.18*follow;
  body.rotation.z=-.12*drive;head.rotation.y=-body.rotation.y*.48;
- body.position.x=-.12*wind+.27*drive;body.position.y=-.07*drive;
+ body.position.x=-.12*wind+.34*drive;body.position.y=-.07*drive;
+ impact.material.opacity=.85*envelope(t,.44,.50,.56,.65);impact.scale.setScalar(1+.9*drive);
  legs.L.hip.rotation.y=-.30*drive;legs.R.hip.rotation.y=.20*drive;
  legs.L.hip.rotation.x=.14*drive;legs.R.hip.rotation.x=-.19*drive;
  // Non-punching glove stays up near the face, even through follow-through.
