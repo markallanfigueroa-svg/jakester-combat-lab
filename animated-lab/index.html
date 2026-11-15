@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v6</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v6</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v6 roundhouse motion pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>Jakester 3D Motion Workshop v7</title><style>body{margin:0;background:#111827;color:#f8fafc;font:15px system-ui}header{padding:12px;text-align:center}h2{margin:4px}small{color:#fbbf24}#view{width:100%;height:58vh;display:block;touch-action:none}.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px}button{border:0;border-radius:10px;background:#eab65a;color:#171717;font-weight:800;min-height:49px}button:active{background:#fff0a5}p{padding:0 12px;color:#cbd5e1}#status{text-align:center;color:#fcd34d}</style></head><body><header><h2>Officer Jakester — 3D Motion Workshop v7</h2><small>SHERIFF APPEARANCE UPGRADE • ARTICULATED 3D PREVIEW</small></header><canvas id="view"></canvas><div id="status">Guard stance • select a move</div><div class="buttons" id="buttons"></div><p>Separate from the working Combat Lab v10. This v6 roundhouse motion pass adds sheriff details to the animated 3D blockout. It is not yet a reference-perfect, skinned production character. Throw and reversal use placeholder choreography.</p><script type="module">
 import * as T from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 const canvas=document.querySelector('#view'),scene=new T.Scene();scene.background=new T.Color('#293449');const camera=new T.PerspectiveCamera(39,1,.1,100);camera.position.set(2.3,2.7,9.8);camera.lookAt(0,1.85,0);const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
 scene.add(new T.HemisphereLight(0xffffff,0x4b5266,2));const lamp=new T.DirectionalLight(0xffe6b8,3);lamp.position.set(-3,8,5);scene.add(lamp);
@@ -83,14 +83,14 @@ function roundhouse(t){
  const turn=envelope(t,.19,.36,.65,.90);
  const extend=envelope(t,.32,.49,.61,.83);
  const l=legs.R,plant=legs.L;
- body.rotation.y=-.18*chamber-1.0*turn;
+ body.rotation.y=.18*chamber+.75*turn;
  body.rotation.z=-.09*turn;
- body.position.x=.20*turn;
+ body.position.x=.34*turn;
  body.position.y=.06*chamber;
- plant.hip.rotation.y=.33*turn;plant.knee.rotation.x=.14*turn;
+ plant.hip.rotation.y=-.33*turn;plant.knee.rotation.x=.14*turn;
  l.hip.rotation.x=-.68*chamber-.32*extend;
- l.hip.rotation.y=-.65*turn;
- l.hip.rotation.z=-.26*chamber-1.48*extend;
+ l.hip.rotation.y=.65*turn;
+ l.hip.rotation.z=.26*chamber+1.48*extend;
  l.knee.rotation.x=.90*chamber-.82*extend;
  arms.L.shoulder.rotation.x=-1.08;arms.L.elbow.rotation.x=-1.75;
  arms.R.shoulder.rotation.x=-1.02;arms.R.elbow.rotation.x=-1.68;
